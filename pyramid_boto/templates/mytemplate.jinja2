@@ -3,24 +3,33 @@
 {% block content %}
 <div class="content">
   <h1>EC2 instances:</h1>
-  <ul>
-  <ul>
-  {% for dict_item in instances %}
-   <li>ID: {{dict_item['instance_id']}} | Name: {{dict_item['name']}} | Availability Zone: {{dict_item['zone']}} | Instance State: {{dict_item['state']}}
-   {% if dict_item['is_active'] %}
-   <button onclick="StartStop('{{ dict_item['instance_id'] }}', '{{dict_item['zone']}}', {{ dict_item['state_code'] }})" 
-  >Start</button>
-   {% else %}
-   <button onclick="StartStop('{{ dict_item['instance_id'] }}', '{{dict_item['zone']}}', {{dict_item['state_code']}})" 
-   >Stop</button>
-   {% endif %}
-   </li>
-{% endfor %}
+  <ul id="ins">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
   </ul>
 </div>
 <script>
+window.onload = () => {
+  console.log('loaded');
+  fetch('/api/ec2').then(response => {
+    return response.json();
+  })
+  .then(myJson => {
+    console.log(myJson);
+    list = '';
+    myJson.instances.map(inst => {
+          const button = `<button class="btn btn-secondary btn-sm" onclick="StartStop('${inst.instance_id}', '${inst.zone}', ${inst.state_code})">${inst.is_active ? 'Start' : 'Stop'}</button>`
+          list += `<li>
+          ID: ${inst.instance_id} | Name: ${inst.name} | Availability Zone: ${inst.zone} | Instance State: ${inst.state} ${button}
+    </li>`;
+    document.querySelector('#ins').innerHTML = list;
+    })
+  });
+};
+
 function StartStop(id, zone, state){
-    const rawResponse = fetch('/', {
+    const rawResponse = fetch('/api/ec2', {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
