@@ -10,9 +10,10 @@ def is_active(state_code):
 def get_home_view(request):
     """Fetch instances and show it at UI"""
     instances = []
-    instance_dict = EC2Client().get_instances()
+    client = EC2Client()
+    client.fetch()
+    instance_dict = client.get_instances()
     for instance in instance_dict:
-        print(instance_dict[instance]['State']['Name'], instance_dict[instance]['State']['Code'])
         instances.append({
             'instance_id': instance,
             'name': instance_dict[instance]['InstanceType'],
