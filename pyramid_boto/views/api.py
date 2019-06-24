@@ -1,3 +1,4 @@
+import botocore
 from pyramid.view import view_config
 from pyramid_boto.ec2_manager import EC2Client
 
@@ -10,8 +11,16 @@ def is_active(state_code):
 def get_api_ec2_view(request):
     """Fetch instances and show it at UI"""
     instances = []
-    client = EC2Client()
-    client.fetch()
+    try:
+        client = EC2Client()
+        client.fetch()
+    except botocore.exceptions.ClientError:
+        request.response.status = 400
+        return {'error': 'Wrong AWS credentials'}
+    except botocore.exceptions.EndpointConnectionError:
+        request.response.status = 400
+        return {'error': 'Could not connect to the Internet'}
+
     instance_dict = client.get_instances()
     for instance in instance_dict:
         instances.append({
@@ -29,7 +38,12 @@ def get_api_ec2_view(request):
 def post_api_ec2_view(request):
     """Receive start/stop signal and apply it"""
     data = request.json_body
-    selected = EC2Client().get_specified_instance(data.get('id'), data.get('zone'))
+    try:
+        selected = EC2Client().get_specified_instance(data.get('id'), data.get('zone'))
+    except botocore.exceptions.ClientError:
+        request.response.status = 400
+        return {'error': 'Wrong AWS credentials'}
+
     if is_active(data.get('state')):
         selected.start()
     else:

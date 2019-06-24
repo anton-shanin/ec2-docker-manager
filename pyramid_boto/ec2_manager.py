@@ -57,3 +57,9 @@ class EC2Client(metaclass=Singleton):
         """
 
         return self.instances
+
+
+if __name__ == '__main__':
+    client = EC2Client()
+    client.fetch()
+    print(client.get_instances())

@@ -25,6 +25,8 @@ window.onload = () => {
     </li>`;
     document.querySelector('#ins').innerHTML = list;
     })
+  }).catch(err => {
+    document.querySelector('#ins').innerHTML = '<h2>Wrong credentials</h2';
   });
 };
 
