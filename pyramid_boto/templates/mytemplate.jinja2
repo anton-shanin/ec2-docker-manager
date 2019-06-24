@@ -1,0 +1,36 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+<div class="content">
+  <h1>EC2 instances:</h1>
+  <ul>
+  <ul>
+  {% for dict_item in instances %}
+   <li>ID: {{dict_item['instance_id']}} | Name: {{dict_item['name']}} | Availability Zone: {{dict_item['zone']}} | Instance State: {{dict_item['state']}}
+   {% if dict_item['is_active'] %}
+   <button onclick="StartStop('{{ dict_item['instance_id'] }}', '{{dict_item['zone']}}', {{ dict_item['state_code'] }})" 
+  >Start</button>
+   {% else %}
+   <button onclick="StartStop('{{ dict_item['instance_id'] }}', '{{dict_item['zone']}}', {{dict_item['state_code']}})" 
+   >Stop</button>
+   {% endif %}
+   </li>
+{% endfor %}
+  </ul>
+</div>
+<script>
+function StartStop(id, zone, state){
+    const rawResponse = fetch('/', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({id, zone, state})
+  }).then(response => {
+    document.location.reload();
+  });
+  
+}
+</script>
+{% endblock content %}

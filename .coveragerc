@@ -1,0 +1,3 @@
+[run]
+source = pyramid_boto
+omit = pyramid_boto/test*
